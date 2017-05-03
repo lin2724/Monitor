@@ -2,6 +2,10 @@ import os
 import time
 import threading
 import signal
+import subprocess
+from subprocess import PIPE
+import re
+
 
 gThreadMutexLog = threading.Lock()
 gTerminalSig = False
@@ -101,52 +105,43 @@ def just_test_func():
     pass
 
 
-if __name__ == '__main__':
-    monitor = Monitor()
-    monitor.add_func(just_test_func, 2)
-    monitor.run()
+def network_status():
+    test_ip = '8.8.8.8'
+    test_cnt = '10'
+    test_cnt_arg = '-c'
+    if os.name == 'nt':
+        return 'Failed'
+    arg_str = ['ping', test_cnt_arg, test_cnt, test_ip]
+    pipe = subprocess.Popen(args=arg_str, stderr=PIPE, stdin=PIPE, stdout=PIPE)
+    while True:
+        if pipe.poll() is not None:
+            if pipe.returncode != 0:
+                ret_str = 'Failed to ping %s' % test_ip
+                return ret_str
+            buf_check = pipe.stdout.read()
+            break
+        time.sleep(0.5)
+
+    # '4 packets transmitted, 4 received, 0% packet loss, time 3003ms'
+    pattern = '(?P<packet_cnt>\d+)\s*packets transmitted,\s*(?P<packet_recv_cnt>\d+)\s*received,' \
+              '\s*(?P<loss_percent>\d+)\s*% packet loss, time (?P<time_ms>\d+)ms'
+    buf = '4 packets transmitted, 4 received, 0% packet loss, time 3003ms'
+    m = re.search(pattern, buf_check)
+    if m:
+        ret_str = "trans-cnt [%s], recv-cnt [%s], loss [%s]" % \
+                  (m.group('packet_cnt'), m.group('packet_recv_cnt'),
+                   m.group('loss_percent'))
+        return ret_str
+    else:
+        return 'Failed to find ping result !'
     pass
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+if __name__ == '__main__':
+    monitor = Monitor()
+    monitor.add_func(network_status, 30)
+    monitor.run()
+    # network_status()
+    pass
 
 
