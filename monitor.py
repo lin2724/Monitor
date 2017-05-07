@@ -6,6 +6,8 @@ import subprocess
 from subprocess import PIPE
 import re
 
+from monitor_utils import check_is_mount
+from monitor_utils import do_mount
 
 gThreadMutexLog = threading.Lock()
 gTerminalSig = False
@@ -17,6 +19,7 @@ class Func:
         self.timeval = 0
         self.run_cnt = 0
         self.is_init = False
+        self.check_interval = 1
         pass
 
     def load(self, func, timeval=100):
@@ -28,13 +31,18 @@ class Func:
     def run(self, d_env_arg):
         global gTerminalSig
         while True:
-            if gTerminalSig:
-                print 'quit..'
-                return
             print 'run func...'
             ret_str = self.func()
-            d_env_arg['log_handle'].log(ret_str)
-            time.sleep(self.timeval)
+            if ret_str is not None:
+                d_env_arg['log_handle'].log(ret_str)
+            tic_val = 1
+            if self.check_interval < self.timeval:
+                tic_val = self.timeval / self.check_interval
+            for tic in range(1, tic_val+1):
+                time.sleep(self.check_interval)
+                if gTerminalSig:
+                    print 'quit..'
+                    return
         pass
 
 
@@ -58,6 +66,7 @@ def sig_handle(a, b):
 class Log:
     def __init__(self, log_file):
         self.fd = open(log_file, 'a+')
+        print 'log file %s' % log_file
         pass
 
     def log(self, log_str):
@@ -72,7 +81,7 @@ class Log:
 
 class Monitor:
     def __init__(self):
-        self.logFile = '%s.log' % __file__
+        self.logFile = '%s.log' % os.path.basename(__file__)
         self.logPath = '/var/log'
         self.logFilePath = os.path.join(self.logPath, self.logFile)
         self.funNodeList = list()
@@ -83,10 +92,12 @@ class Monitor:
         env_arg = dict()
         log_handle = Log(log_file=self.logFilePath)
         env_arg['log_handle'] = log_handle
+        task_list = list()
         for func_node in self.funNodeList:
             pro = threading.Thread(target=thread_run_func, args=(env_arg, func_node))
             pro.setDaemon(False)
             pro.start()
+            task_list.append(pro)
         while True:
             time.sleep(2)
             if gTerminalSig:
@@ -113,6 +124,7 @@ def network_status():
         return 'Failed'
     arg_str = ['ping', test_cnt_arg, test_cnt, test_ip]
     pipe = subprocess.Popen(args=arg_str, stderr=PIPE, stdin=PIPE, stdout=PIPE)
+    buf_check = ''
     while True:
         if pipe.poll() is not None:
             if pipe.returncode != 0:
@@ -137,9 +149,28 @@ def network_status():
     pass
 
 
+def auto_mount():
+    mount_dir = '/root/MountPoint'
+    check_dev_list = ['sda', 'sdb', 'sdc']
+    dev_folder = '/dev/'
+    for check_dev in check_dev_list:
+        dev_path = os.path.join(dev_folder, check_dev)
+        if os.path.exists(dev_path):
+            if not check_is_mount(dev_path):
+                mount_path = os.path.join(mount_dir, check_dev)
+                if not do_mount(dev_path, mount_path):
+                    continue
+                    # return 'Failed to mount [%s] at [%s]' % (dev_path, mount_path)
+                return 'Succeed to mount [%s] at [%s]' % (dev_path, mount_path)
+    return None
+
+    pass
+
+
 if __name__ == '__main__':
     monitor = Monitor()
-    monitor.add_func(network_status, 30)
+    monitor.add_func(network_status, 60)
+    monitor.add_func(auto_mount, 10)
     monitor.run()
     # network_status()
     pass
