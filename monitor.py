@@ -161,7 +161,6 @@ def get_dev_mount_list():
 
 def auto_mount():
     mount_dir = '/root/MountPoint'
-    check_dev_list = ['sda', 'sdb', 'sdc']
     dev_folder = '/dev/'
     check_dev_list = get_dev_mount_list()
     for check_dev in check_dev_list:
