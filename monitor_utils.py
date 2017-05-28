@@ -38,3 +38,42 @@ def do_mount(dev_path, mount_path):
         time.sleep(0.5)
 
     pass
+
+
+def check_run(program_name):
+    # check if a program is running!
+    # return tup (yes/no, pidlist)
+    command = ['pidof', program_name]
+    pipe = subprocess.Popen(args=command, stdout=subprocess.PIPE)
+    while True:
+        if pipe.poll() is not None:
+            if 0 != pipe.returncode:
+                return False, None
+            else:
+                ret = pipe.stdout.read()
+                if ret.isdigit():
+                    return True, ret.split()
+                else:
+                    return False, False
+        time.sleep(0.1)
+    pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
