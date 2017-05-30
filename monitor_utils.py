@@ -59,6 +59,36 @@ def check_run(program_name):
     pass
 
 
+def run_shell(command_list):
+    command = command_list
+    pipe = subprocess.Popen(args=command, stdout=subprocess.PIPE)
+    while True:
+        if pipe.poll() is not None:
+            if 0 != pipe.returncode:
+                return False, None
+            else:
+                ret = pipe.stdout.read()
+                if ret.isdigit():
+                    return True, ret.split()
+                else:
+                    return False, False
+        time.sleep(0.1)
+    pass
+
+
+def set_network(device_name, cmd):
+    if cmd != 'up':
+        cmd = 'down'
+    command = ['ifconfig', device_name, cmd]
+    pipe = subprocess.Popen(args=command, stdout=subprocess.PIPE)
+    while True:
+        if pipe.poll() is not None:
+            if 0 != pipe.returncode:
+                return False
+            else:
+                return True
+        time.sleep(0.1)
+    pass
 
 
 

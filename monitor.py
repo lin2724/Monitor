@@ -8,6 +8,7 @@ import re
 
 from monitor_utils import check_is_mount
 from monitor_utils import do_mount
+from monitor_utils import set_network
 
 gThreadMutexLog = threading.Lock()
 gTerminalSig = False
@@ -143,6 +144,11 @@ def network_status():
         ret_str = "trans-cnt [%s], recv-cnt [%s], loss [%s]" % \
                   (m.group('packet_cnt'), m.group('packet_recv_cnt'),
                    m.group('loss_percent'))
+        if m.group('packet_cnt') == m.group('loss_percent'):
+            set_network('eth0', 'down')
+            time.sleep(1)
+            set_network('eth0', 'up')
+            return 'Reset Network for eth0'
         return ret_str
     else:
         return 'Failed to find ping result !'
