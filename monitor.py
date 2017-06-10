@@ -130,6 +130,9 @@ def network_status():
         if pipe.poll() is not None:
             if pipe.returncode != 0:
                 ret_str = 'Failed to ping %s' % test_ip
+                set_network('eth0', 'down')
+                time.sleep(1)
+                set_network('eth0', 'up')
                 return ret_str
             buf_check = pipe.stdout.read()
             break
