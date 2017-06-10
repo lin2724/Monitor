@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import threading
 import signal
@@ -33,7 +34,11 @@ class Func:
         global gTerminalSig
         while True:
             print 'run func...'
-            ret_str = self.func()
+            try:
+                ret_str = self.func()
+            except:
+                e = sys.exc_info()[0]
+                d_env_arg['log_handle'].log(ret_str)
             if ret_str is not None:
                 d_env_arg['log_handle'].log(ret_str)
             tic_val = 1
@@ -116,8 +121,11 @@ def just_test_func():
     return 'hello --'
     pass
 
+gNetWorkFailedCnt = 0
+
 
 def network_status():
+    global gNetWorkFailedCnt
     test_ip = '8.8.8.8'
     test_cnt = '10'
     test_cnt_arg = '-c'
@@ -130,9 +138,13 @@ def network_status():
         if pipe.poll() is not None:
             if pipe.returncode != 0:
                 ret_str = 'Failed to ping %s' % test_ip
-                set_network('eth0', 'down')
-                time.sleep(1)
-                set_network('eth0', 'up')
+                if gNetWorkFailedCnt > 3:
+                    set_network('eth0', 'down')
+                    time.sleep(1)
+                    set_network('eth0', 'up')
+                    gNetWorkFailedCnt = 0
+                else:
+                    gNetWorkFailedCnt += 1
                 return ret_str
             buf_check = pipe.stdout.read()
             break
