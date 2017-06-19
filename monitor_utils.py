@@ -33,6 +33,8 @@ def do_mount(dev_path, mount_path):
     while True:
         if pipe.poll() is not None:
             if pipe.returncode != 0:
+                if check_folder_is_empty(mount_path):
+                    os.removedirs(mount_path)
                 return False
             return True
         time.sleep(0.5)
@@ -90,6 +92,17 @@ def set_network(device_name, cmd):
         time.sleep(0.1)
     pass
 
+
+def check_folder_is_empty(folder_path):
+    #  empty folder return True
+    #  not empty return False
+    if not os.path.exists(folder_path):
+        return False
+    for root, folders, files in os.walk(folder_path):
+        if not len(folders) or not len(files):
+            return False
+        return True
+    return True
 
 
 

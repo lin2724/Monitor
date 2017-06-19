@@ -10,6 +10,7 @@ import re
 from monitor_utils import check_is_mount
 from monitor_utils import do_mount
 from monitor_utils import set_network
+from monitor_utils import check_folder_is_empty
 
 gThreadMutexLog = threading.Lock()
 gTerminalSig = False
