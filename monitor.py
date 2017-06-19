@@ -209,7 +209,7 @@ def increase_ignore(dev_name):
     new_item['name'] = dev_name[:]
     new_item['value'] = 0
     gIgnorDevList.append(new_item)
-    return 0
+    return
 
 
 def auto_mount():
