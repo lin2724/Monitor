@@ -35,6 +35,7 @@ class Func:
         global gTerminalSig
         while True:
             print 'run func...'
+            ret_str = None
             try:
                 ret_str = self.func()
             except:
@@ -238,7 +239,7 @@ def auto_mount():
 if __name__ == '__main__':
     monitor = Monitor()
     monitor.add_func(network_status, 60)
-    monitor.add_func(auto_mount, 10)
+    monitor.add_func(auto_mount, 3)
     monitor.run()
     # network_status()
     pass

@@ -34,7 +34,10 @@ def do_mount(dev_path, mount_path):
         if pipe.poll() is not None:
             if pipe.returncode != 0:
                 if check_folder_is_empty(mount_path):
+                    print 'remove [%s]' % mount_path
                     os.removedirs(mount_path)
+                else:
+                    print 'Not empty [%s]' % mount_path
                 return False
             return True
         time.sleep(0.5)
