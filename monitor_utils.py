@@ -34,7 +34,7 @@ def do_mount(dev_path, mount_path):
         if pipe.poll() is not None:
             if pipe.returncode != 0:
                 if check_folder_is_empty(mount_path):
-                    os.removedirs(mount_path) 
+                    os.removedirs(mount_path)
                 return False
             return True
         time.sleep(0.5)
@@ -103,6 +103,16 @@ def check_folder_is_empty(folder_path):
             return False
         return True
     return True
+
+
+def rm_empty_folder(folder_path):
+    if not os.path.exists(folder_path):
+        return
+    objects = os.listdir(folder_path)
+    for object in objects:
+        full_path = os.path.join(folder_path, object)
+        if os.path.isdir(full_path) and check_folder_is_empty(full_path):
+            os.removedirs(full_path)
 
 
 

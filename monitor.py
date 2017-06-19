@@ -10,7 +10,7 @@ import re
 from monitor_utils import check_is_mount
 from monitor_utils import do_mount
 from monitor_utils import set_network
-from monitor_utils import check_folder_is_empty
+from monitor_utils import rm_empty_folder
 
 gThreadMutexLog = threading.Lock()
 gTerminalSig = False
@@ -180,18 +180,53 @@ def get_dev_mount_list():
     return ret_list
     pass
 
+gIgnorDevList = list()
+
+
+def check_ignore(dev_name):
+    global gIgnorDevList
+    found_flag = False
+    for item in gIgnorDevList:
+        if item['name'] == dev_name:
+            return item['value']
+    new_item = dict()
+    new_item['name'] = dev_name[:]
+    new_item['value'] = 0
+    gIgnorDevList.append(new_item)
+    return 0
+    pass
+
+
+def increase_ignore(dev_name):
+    global gIgnorDevList
+    found_flag = False
+    for item in gIgnorDevList:
+        if item['name'] == dev_name:
+            item['value'] += 1
+            return
+    new_item = dict()
+    new_item['name'] = dev_name[:]
+    new_item['value'] = 0
+    gIgnorDevList.append(new_item)
+    return 0
+
 
 def auto_mount():
     mount_dir = '/root/MountPoint'
     dev_folder = '/dev/'
+    rm_empty_folder(mount_dir)
     check_dev_list = get_dev_mount_list()
     for check_dev in check_dev_list:
+        if check_ignore(check_dev) > 2:
+            print 'Skip ', check_dev
+            continue
         print 'Check ', check_dev
         dev_path = os.path.join(dev_folder, check_dev)
         if os.path.exists(dev_path):
             if not check_is_mount(dev_path):
                 mount_path = os.path.join(mount_dir, check_dev)
                 if not do_mount(dev_path, mount_path):
+                    increase_ignore(check_dev)
                     continue
                     # return 'Failed to mount [%s] at [%s]' % (dev_path, mount_path)
                 return 'Succeed to mount [%s] at [%s]' % (dev_path, mount_path)
