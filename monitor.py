@@ -40,7 +40,7 @@ class Func:
                 ret_str = self.func()
             except:
                 e = sys.exc_info()[0]
-                d_env_arg['log_handle'].log(ret_str)
+                d_env_arg['log_handle'].log(e)
             if ret_str is not None:
                 d_env_arg['log_handle'].log(ret_str)
             tic_val = 1
