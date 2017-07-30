@@ -141,9 +141,9 @@ def network_status():
             if pipe.returncode != 0:
                 ret_str = 'Failed to ping %s' % test_ip
                 if gNetWorkFailedCnt > 3:
-                    set_network('eth0', 'down')
+                    # set_network('eth0', 'down')
                     time.sleep(1)
-                    set_network('eth0', 'up')
+                    # set_network('eth0', 'up')
                     gNetWorkFailedCnt = 0
                 else:
                     gNetWorkFailedCnt += 1
