@@ -80,6 +80,7 @@ def run_shell(command_list):
 
 
 def set_network(device_name, cmd):
+    return
     if cmd != 'up':
         cmd = 'down'
     command = ['ifconfig', device_name, cmd]
