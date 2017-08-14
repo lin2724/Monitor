@@ -166,7 +166,7 @@ def network_status():
             # time.sleep(1)
             # set_network('eth0', 'up')
             # return 'Reset Network for eth0'
-            return 'Package loss 100%, %s' % ret_str
+            return 'Package loss 100%, ' + ret_str
         return ret_str
     else:
         return 'Failed to find ping result !'
