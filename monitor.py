@@ -162,10 +162,11 @@ def network_status():
                   (m.group('packet_cnt'), m.group('packet_recv_cnt'),
                    m.group('loss_percent'))
         if m.group('packet_cnt') == m.group('loss_percent'):
-            set_network('eth0', 'down')
-            time.sleep(1)
-            set_network('eth0', 'up')
-            return 'Reset Network for eth0'
+            # set_network('eth0', 'down')
+            # time.sleep(1)
+            # set_network('eth0', 'up')
+            # return 'Reset Network for eth0'
+            return 'Package loss 100%, %s' % ret_str
         return ret_str
     else:
         return 'Failed to find ping result !'
