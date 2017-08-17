@@ -5,6 +5,7 @@ import threading
 import signal
 import subprocess
 from subprocess import PIPE
+import requests
 import re
 
 from monitor_utils import check_is_mount
@@ -199,6 +200,16 @@ def check_ignore(dev_name):
     pass
 
 
+def get_login_page():
+    url = 'http://192.168.31.1'
+    req = requests.request('GET', url, timeout=3)
+    if 200 != req.status_code:
+        return 'Failed to get login page'
+    else:
+        return 'Succeed to get login page'
+    pass
+
+
 def increase_ignore(dev_name):
     global gIgnorDevList
     found_flag = False
@@ -241,6 +252,8 @@ if __name__ == '__main__':
     monitor = Monitor()
     monitor.add_func(network_status, 60)
     monitor.add_func(auto_mount, 3)
+    monitor.add_func(get_login_page, 60)
+
     monitor.run()
     # network_status()
     pass
