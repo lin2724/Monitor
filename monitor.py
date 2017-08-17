@@ -128,7 +128,7 @@ gNetWorkFailedCnt = 0
 
 def network_status():
     global gNetWorkFailedCnt
-    test_ip = '8.8.8.8'
+    test_ip = '192.168.31.1'
     test_cnt = '10'
     test_cnt_arg = '-c'
     if os.name == 'nt':
